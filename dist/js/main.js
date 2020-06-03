@@ -10893,34 +10893,48 @@ randomDate: function(start, end) {
   
     return `${y}-${m}-${d}`;
   },
-    // Application Constructor
-    init: function() {
-        // Testing for video playblack
-        // let date = "2013-06-06";
-        let date = this.randomDate(new Date(1995, 5, 16), new Date());
-        var url = "https://api.nasa.gov/planetary/apod?api_key=gsrg1cuxTajEKaeagEa31a8cZpuIpe7w2qqLr1q9&date=" + date;
-
-        $.ajax({
-            url: url
-        })
-        .done(function(result){
-            $("#apodTitle").text(result.title);
-           //If the media type is video hide the image elements and display a video.
-        if(result.media_type === 'video') {
-            $("#apodImg").hide();
-            $("#apodVideo > iframe").attr("src", result.url).show();
-        }else{
-            $("#apodVideo").hide();
-            $("#apodImg").attr("src", result.url).attr('alt', result.title).show();
-  }      // $("#apodImg").attr("src", result.url).attr('alt', result.title);
-            $("#apodCopyright").text("Copyright: " + result.copyright);
-            $("#apodDate").text("Date: " + date);
-            $("#apodDesc").text(result.explanation);
-          }).
-        fail(function(result){
-          console.log(result);
-        });
-    },
+    //Injects the results of the API call into the DOM
+buildDOM: function(result) {
+    $("#apodTitle").text(result.title);
+  
+    if(result.media_type === 'video') {
+      $("#apodImage").hide();
+      $("#apodVideo > iframe").attr("src", result.url).show();
+    }else{
+      $("#apodVideo").hide();
+      $("#apodImg").attr("src", result.url).attr('alt', result.title).show();
+    }
+  
+    $("#apodCopyright").text("Copyright: " + result.copyright);
+    $("#apodDate").text("Date: " + result.date);
+    $("#apodDesc").text(result.explanation);
+  },
+  
+  //Executes an AJAX call to an API.
+  getRequest: function() {
+    let _this = this;
+    let date = this.randomDate(new Date(1995, 5, 16), new Date());
+    let url = "https://api.nasa.gov/planetary/apod?api_key=gsrg1cuxTajEKaeagEa31a8cZpuIpe7w2qqLr1q9&date=" + date;
+    $.ajax({
+        url: url
+    }).done(function(result){
+        _this.buildDOM(result);
+    }).fail(function(result){
+      console.log(result);
+    });
+  },
+  
+  // Initialization method.
+  init: function() {
+    this.getRequest();
+  },
 };
 
 apod.init();
+
+/* https://learn.jquery.com/using-jquery-core/document-ready/ */
+$(function() {
+    $('#btnRandApod').on('click',function(){
+      apod.getRequest();
+    });
+});
